@@ -5,16 +5,45 @@ from world import World
 import random
 from ast import literal_eval
 
+# Import Stack
+class Stack():
+    def __init__(self):
+        self.stack = []
+    def push(self, value):
+        self.stack.append(value)
+    def pop(self):
+        if self.size() > 0:
+            return self.stack.pop()
+        else:
+            return None
+    def size(self):
+        return len(self.stack)
+
+# Import Queue
+class Queue():
+    def __init__(self):
+        self.queue = []
+    def enqueue(self, value):
+        self.queue.append(value)
+    def dequeue(self):
+        if self.size() > 0:
+            return self.queue.pop(0)
+        else:
+            return None
+    def size(self):
+        return len(self.queue)
+
+
 # Load world
 world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-# map_file = "maps/test_line.txt"
+map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-map_file = "maps/main_maze.txt"
+# map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -28,8 +57,36 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
+visited_path = set()
+st = Stack()
+qt = Queue()
+print(room_graph)
+print('current amount of rooms in map', len(room_graph))
+print(f'Current rooms visited: {len(visited_path)}')
+print(player.current_room.get_exits())
+for i in player.current_room.get_exits():
+    direction = i.join('_to')
+    print('join',direction)
+# while room_graph != visited_path:
+#     for i in player.current_room.get_exits():
+#         player.travel(i)
+#         visited_path.add(player.current_room)
+#         traversal_path.append(i)
+#         if player.travel(i) == "You cannot move in that direction.":
+#             pass
 
 
+# Walk in a stack (go backwards!)
+# DFT then BFT (look at the hints)
+# Get NEIGHBORS!!!
+# DFT and backtracking is enough for MVP
+# While loop of DFT
+# Then loop of BFT
+# Understanding and Planning is HUGE part of this!!!
+
+# This is the Travelling Salesman problem
+
+# Learning framework Beej uses to be better teacher: UPER! 
 
 # TRAVERSAL TEST - DO NOT MODIFY
 visited_rooms = set()
@@ -51,12 +108,14 @@ else:
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-player.current_room.print_room_description(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    elif cmds[0] == "q":
-        break
-    else:
-        print("I did not understand that command.")
+# player.current_room.print_room_description(player)
+# while True:
+#     cmds = input("-> ").lower().split(" ")
+#     if cmds[0] in ["n", "s", "e", "w"]:
+#         player.travel(cmds[0], True)
+#         visited_rooms.add(player.current_room)
+#     elif cmds[0] == "q":
+#         break
+#     else:
+#         print("I did not understand that command.")
+
