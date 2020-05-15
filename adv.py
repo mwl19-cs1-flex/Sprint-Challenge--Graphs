@@ -65,26 +65,26 @@ st.push(player.current_room)
 qt.enqueue(player.current_room)
 print(world.starting_room)
 
-# while visited_path != room_graph:
-#     cell = qt.dequeue()
-#     print(cell)
-#     if cell not in visited_path:
-#         visited_path.add(cell)
-#     for i in cell.get_exits():
-#         next_cell = cell.get_room_in_direction(i)
-#         if next_cell not in visited_path:
-#             traversal_path.append(i)
-#             qt.enqueue(next_cell)
-
-while st.size() > 0:
-    cell = st.pop()
+while qt.size() > 0:
+    cell = qt.dequeue()
+    print(cell)
     if cell not in visited_path:
         visited_path.add(cell)
     for i in cell.get_exits():
         next_cell = cell.get_room_in_direction(i)
         if next_cell not in visited_path:
             traversal_path.append(i)
-            st.push(next_cell)
+            qt.enqueue(next_cell)
+
+# while st.size() > 0:
+#     cell = st.pop()
+#     if cell not in visited_path:
+#         visited_path.add(cell)
+#     for i in cell.get_exits():
+#         next_cell = cell.get_room_in_direction(i)
+#         if next_cell not in visited_path:
+#             traversal_path.append(i)
+#             st.push(next_cell)
 
 # print(room_graph)
 # print('current amount of rooms in map', len(room_graph))
