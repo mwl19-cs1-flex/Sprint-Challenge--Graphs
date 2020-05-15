@@ -15,6 +15,17 @@ class Room:
         return f"\n-------------------\n\n{self.name}\n\n   {self.description}\n\n{self.get_exits_string()}\n"
     def print_room_description(self, player):
         print(str(self))
+    def get_connected_rooms(self):
+        connected_rooms = []
+        if self.n_to is not None:
+            connected_rooms.append(("n", self.n_to))
+        if self.s_to is not None:
+            connected_rooms.append(("s", self.s_to))
+        if self.w_to is not None:
+            connected_rooms.append(("w", self.w_to))
+        if self.e_to is not None:
+            connected_rooms.append(("e", self.e_to))
+        return connected_rooms
     def get_exits(self):
         exits = []
         if self.n_to is not None:

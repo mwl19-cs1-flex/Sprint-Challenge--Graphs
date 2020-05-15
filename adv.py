@@ -39,8 +39,8 @@ world = World()
 
 
 # You may uncomment the smaller graphs for development and testing purposes.
-map_file = "maps/test_line.txt"
-# map_file = "maps/test_cross.txt"
+# map_file = "maps/test_line.txt"
+map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
 # map_file = "maps/main_maze.txt"
@@ -57,34 +57,61 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
-visited_path = set()
+visited = set()
+# visited_path = set()
 st = Stack()
-qt = Queue()
+# qt = Queue()
 
 st.push(player.current_room)
-qt.enqueue(player.current_room)
-print(world.starting_room)
+# qt.enqueue(player.current_room)
 
-while qt.size() > 0:
-    cell = qt.dequeue()
-    print(cell)
-    if cell not in visited_path:
-        visited_path.add(cell)
-    for i in cell.get_exits():
-        next_cell = cell.get_room_in_direction(i)
-        if next_cell not in visited_path:
-            traversal_path.append(i)
-            qt.enqueue(next_cell)
+while st.size() > 0:
+    if player.current_room not in visited:
+        visited.add(player.current_room)
+    exits = player.current_room.get_exits()
+    for next_room in exits:
+        travel = player.current_room.get_room_in_direction(next_room)
+        if travel == True and travel not in visited:
+            player.travel(next_room)
+            traversal_path.append(next_room)
+            st.push(player.current_room)
+
+# def map_recursive(starting_room, visited=None, traversal=None):
+#     if visited is None:
+#         visited = set()
+#     if traversal is None:
+#         traversal = list()
+#     if starting_room in visited:
+#         return
+#     if starting_room not in visited:
+#         visited.add(starting_room)
+#         for (direction, next_room) in starting_room.get_connected_rooms():
+#             traversal = traversal + [direction] + [direction]
+#             map_recursive(next_room, visited, traversal)
+    
+#     return traversal 
 
 # while st.size() > 0:
 #     cell = st.pop()
 #     if cell not in visited_path:
 #         visited_path.add(cell)
-#     for i in cell.get_exits():
-#         next_cell = cell.get_room_in_direction(i)
-#         if next_cell not in visited_path:
-#             traversal_path.append(i)
-#             st.push(next_cell)
+#         for i in cell.get_connected_rooms():
+#             player.travel(i[0])
+#             traversal_path.append(i[0])
+#             st.push(i[1])
+
+
+        # if next_cell not in visited_path:
+        #     traversal_path.append(i)
+        #     traversal_path.append(i)
+        #     traversal_path.append(i)
+        #     st.push(next_cell)
+
+    # for i in cell.get_exits():
+    #     next_cell = cell.get_room_in_direction(i)
+    #     if next_cell not in visited_path:
+    #         traversal_path.append(i)
+    #         st.push(next_cell)
 
 # print(room_graph)
 # print('current amount of rooms in map', len(room_graph))
@@ -121,6 +148,21 @@ while qt.size() > 0:
 #         if player.travel(i) == "You cannot move in that direction.":
 #             pass
 
+# while qt.size() > 0:
+#     cell = qt.dequeue()
+#     if cell not in visited_path:
+#         visited_path.add(cell)
+#     while st.size() > 0:
+#         cell = st.pop()
+#         if cell not in visited_path:
+#             visited_path.add(cell)
+#         for i in cell.get_exits():
+#             next_cell = cell.get_room_in_direction(i)
+#             if next_cell not in visited_path:
+#                 traversal_path.append(i)
+#                 qt.enqueue(next_cell)
+#                 st.push(next_cell)
+
 # NOTES FROM BEEJ
 # Walk in a stack (go backwards!)
 # DFT then BFT (look at the hints)
@@ -141,14 +183,13 @@ for move in traversal_path:
     player.travel(move)
     visited_rooms.add(player.current_room)
 
+print(f"MOVES: {len(traversal_path)}")
+
 if len(visited_rooms) == len(room_graph):
     print(f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
-
-for i in visited_rooms:
-    print(i.id)
 
 #######
 # UNCOMMENT TO WALK AROUND
