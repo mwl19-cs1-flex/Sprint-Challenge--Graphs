@@ -5,6 +5,8 @@ from world import World
 import random
 from ast import literal_eval
 
+traversal_path = []
+
 # Import Stack
 class Stack():
     def __init__(self):
@@ -33,6 +35,51 @@ class Queue():
     def size(self):
         return len(self.queue)
 
+# Import Graph
+class Graph:
+    def __init__(self):
+        self.vertices = {}
+
+    def add_vertex(self, vertex_id):
+        self.vertices[vertex_id] = set() 
+
+    def add_edge(self, v1, v2):
+        if v1 in self.vertices and v2 in self.vertices:
+            self.vertices[v1].add(v2)
+        elif v1 not in self.vertices:
+            self.add_vertex(v1)
+            self.vertices[v1].add(v2)
+        elif v2 not in self.vertices:
+            self.add_vertex(v2)
+            self.vertices[v1].add(v2)
+
+    def get_neighbors(self, vertex_id):
+        if vertex_id not in self.vertices:
+            raise IndexError("Vertex does not exist in graph!")
+        return self.vertices[vertex_id]
+
+    def bft(self, starting_vertex):
+        qq = Queue()
+        qq.enqueue(starting_vertex)
+        visited = set()
+        while qq.size() > 0:
+            vert = qq.dequeue()
+            if vert not in visited:
+                visited.add(vert)
+                for next_vert in self.get_neighbors(vert):
+                    qq.enqueue(next_vert)
+
+    def dft(self, starting_vertex):
+        st = Stack()
+        st.push(starting_vertex)
+        visited = set()
+        while st.size() > 0:
+            vert = st.pop()
+            if vert not in visited:
+                print(vert)
+                visited.add(vert)
+                for next_vert in self.get_neighbors(vert):
+                    st.push(next_vert)
 
 # Load world
 world = World()
@@ -56,25 +103,106 @@ player = Player(world.starting_room)
 
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
-traversal_path = []
-visited = set()
 # visited_path = set()
+
+
+# a traversal path
+# a reversal path (empty list)
+# visited was empty dictionary
+# inverse direction (n to s, e to w)
+# length of room graph and length of visited
+# current room get exits, pass that into visited dictionary of current room id
+visited_path = set()
 st = Stack()
-# qt = Queue()
+# st.push(player.current_room)
+qt = Queue()
+qt.enqueue(player.current_room)
+reversal_path = {'n': 's', 's': 'n', 'w': 'e', 'e': 'w'}
 
-st.push(player.current_room)
-# qt.enqueue(player.current_room)
+gg = Graph()
+for item in room_graph:
+    gg.add_vertex(item)
+    for room in room_graph[item][1]:
+        gg.add_edge(item, room_graph[item][1][room])
 
-while st.size() > 0:
-    if player.current_room not in visited:
-        visited.add(player.current_room)
-    exits = player.current_room.get_exits()
-    for next_room in exits:
-        travel = player.current_room.get_room_in_direction(next_room)
-        if travel == True and travel not in visited:
-            player.travel(next_room)
-            traversal_path.append(next_room)
-            st.push(player.current_room)
+gg.dft(player.current_room.id)
+
+
+# for item in room_graph:
+#     gg.add_edge(room_graph[item][1], room_graph)
+# for item in room_graph[0][1]:
+#     print(room_graph[0][1][item])
+# while len(visited_path) < len(room_graph):
+#     while qt.size() > 0:
+#         cell = qt.dequeue()  
+#         if cell not in visited_path:
+#             visited_path.add(cell)
+#             for item in cell.get_exits():
+#                 next_room = cell.get_room_in_direction(item)
+#                 if next_room is not None:
+#                     player.travel(item)
+#                     traversal_path.append(item)
+#                     qt.enqueue(player.current_room)  
+#                 else:
+#                     pass
+#     st.push(player.current_room)
+#     while st.size() > 0:
+#         area = st.pop()
+#         if area not in visited_path:
+#             visited_path.add(area)
+#             for item in area.get_exits():
+#                 next_room = area.get_room_in_direction(item)
+#                 if next_room is not None:
+#                     player.travel(item)
+#                     traversal_path.append(item)
+#                     st.push(player.current_room)
+#                 else:
+#                     pass
+
+# for item in ['n', 's', 'e', 'w']:
+#     traversal_path.append(reversal_path[item])
+    
+# while len(visited_path) < len(room_graph):
+#     cell = qt.dequeue() # st.pop()
+#     if cell not in visited_path:
+#         visited_path.add(cell)
+#         for item in cell.get_exits():
+#             if cell.get_room_in_direction(item) not in visited_path:
+#                 traversal_path.append(item)
+#                 traversal_path.append(item)
+#                 traversal_path.append(item)
+#                 qt.enqueue(cell.get_room_in_direction(item))# st.push(cell.get_room_in_direction(item))
+        
+
+
+# for item in visited_path:
+#     print(item.id)
+
+# for item in traversal_path:    
+#     traversal_path.append(reversal_path[item])
+
+
+# while st.size() > 0:
+#     cell = st.pop()
+#     if cell not in visited_path:
+#         visited_path.add(cell)
+#     for i in cell.get_exits():
+#         next_cell = cell.get_room_in_direction(i)
+#         if next_cell not in visited_path and next_cell is not None:
+#             traversal_path.append(i)
+#             traversal_path.append(i)
+#             st.push(next_cell)
+
+# while st.size() > 0:
+#     if player.current_room not in visited:
+#         visited.add(player.current_room)
+#     exits = player.current_room.get_exits()
+#     for next_room in exits:
+#         travel = player.current_room.get_room_in_direction(next_room)
+#         if travel == True and travel not in visited:
+#             player.travel(next_room)
+#             traversal_path.append(next_room)
+#             st.push(player.current_room)
 
 # def map_recursive(starting_room, visited=None, traversal=None):
 #     if visited is None:
@@ -93,12 +221,12 @@ while st.size() > 0:
 
 # while st.size() > 0:
 #     cell = st.pop()
-#     if cell not in visited_path:
-#         visited_path.add(cell)
+#     if cell not in visited:
+#         visited.add(cell)
 #         for i in cell.get_connected_rooms():
 #             player.travel(i[0])
 #             traversal_path.append(i[0])
-#             st.push(i[1])
+#             st.push(player.current_room)
 
 
         # if next_cell not in visited_path:
@@ -182,6 +310,8 @@ visited_rooms.add(player.current_room)
 for move in traversal_path:
     player.travel(move)
     visited_rooms.add(player.current_room)
+    print(f"MOVE: {move}")
+    print(f"ID:{player.current_room.id}")
 
 print(f"MOVES: {len(traversal_path)}")
 
