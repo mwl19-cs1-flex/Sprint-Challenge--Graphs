@@ -5,81 +5,6 @@ from world import World
 import random
 from ast import literal_eval
 
-traversal_path = []
-
-# Import Stack
-class Stack():
-    def __init__(self):
-        self.stack = []
-    def push(self, value):
-        self.stack.append(value)
-    def pop(self):
-        if self.size() > 0:
-            return self.stack.pop()
-        else:
-            return None
-    def size(self):
-        return len(self.stack)
-
-# Import Queue
-class Queue():
-    def __init__(self):
-        self.queue = []
-    def enqueue(self, value):
-        self.queue.append(value)
-    def dequeue(self):
-        if self.size() > 0:
-            return self.queue.pop(0)
-        else:
-            return None
-    def size(self):
-        return len(self.queue)
-
-# Import Graph
-class Graph:
-    def __init__(self):
-        self.vertices = {}
-
-    def add_vertex(self, vertex_id):
-        self.vertices[vertex_id] = set() 
-
-    def add_edge(self, v1, v2):
-        if v1 in self.vertices and v2 in self.vertices:
-            self.vertices[v1].add(v2)
-        elif v1 not in self.vertices:
-            self.add_vertex(v1)
-            self.vertices[v1].add(v2)
-        elif v2 not in self.vertices:
-            self.add_vertex(v2)
-            self.vertices[v1].add(v2)
-
-    def get_neighbors(self, vertex_id):
-        if vertex_id not in self.vertices:
-            raise IndexError("Vertex does not exist in graph!")
-        return self.vertices[vertex_id]
-
-    def bft(self, starting_vertex):
-        qq = Queue()
-        qq.enqueue(starting_vertex)
-        visited = set()
-        while qq.size() > 0:
-            vert = qq.dequeue()
-            if vert not in visited:
-                visited.add(vert)
-                for next_vert in self.get_neighbors(vert):
-                    qq.enqueue(next_vert)
-
-    def dft(self, starting_vertex):
-        st = Stack()
-        st.push(starting_vertex)
-        visited = set()
-        while st.size() > 0:
-            vert = st.pop()
-            if vert not in visited:
-                print(vert)
-                visited.add(vert)
-                for next_vert in self.get_neighbors(vert):
-                    st.push(next_vert)
 
 # Load world
 world = World()
@@ -87,10 +12,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -101,31 +26,140 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
+# So I need a while loop that tracks a stack or a queue to the length of the room
+# length of room minus 1 because we will already have the first room
+# add the current room if it isn't in the visited stack with all of the exits
+# remove the exits from the stack and add them to a path to make the player move in reverse
+# once that stack is empty, add them to the traversal path
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
+
+# Setup
+traversal_path = []
+# Create a reverse path
+reversal_path = []
+# Track which rooms I've been in (id, plus exits of room)
+visited = dict() # it's our hybrid slack/set, we have lengths but we use its items as a stack
+reverse_direction = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+
+# # start in room 0 and return exits
+
+# visited gets treated like a stack, but also a set - we need to populate it first
+visited[0] = player.current_room.get_exits() # sets the first item in the visited dict to the current exits
+
+# we need visited to be the length of our room graph
+while len(visited) < len(room_graph) - 1:
+    # if current room hasn't been visited, add it
+    if player.current_room.id not in visited:
+        visited[player.current_room.id] = player.current_room.get_exits() 
+        last_room = reversal_path[-1] 
+        visited[player.current_room.id].remove(last_room) 
+
+    # this is what populates our traversal path, once its 0 we can utilize it
+    while len(visited[player.current_room.id]) < 1:
+        reverse = reversal_path.pop()
+        traversal_path.append(reverse)
+        player.travel(reverse)
+
+    next_direction = visited[player.current_room.id].pop()
+    traversal_path.append(next_direction)
+    reversal_path.append(reverse_direction[next_direction])
+    player.travel(next_direction)
+
+# # Import Stack
+# class Stack():
+#     def __init__(self):
+#         self.stack = []
+#     def push(self, value):
+#         self.stack.append(value)
+#     def pop(self):
+#         if self.size() > 0:
+#             return self.stack.pop()
+#         else:
+#             return None
+#     def size(self):
+#         return len(self.stack)
+
+# # Import Queue
+# class Queue():
+#     def __init__(self):
+#         self.queue = []
+#     def enqueue(self, value):
+#         self.queue.append(value)
+#     def dequeue(self):
+#         if self.size() > 0:
+#             return self.queue.pop(0)
+#         else:
+#             return None
+#     def size(self):
+#         return len(self.queue)
+
+# # Import Graph
+# class Graph:
+#     def __init__(self):
+#         self.vertices = {}
+
+#     def add_vertex(self, vertex_id):
+#         self.vertices[vertex_id] = set() 
+
+#     def add_edge(self, v1, v2):
+#         if v1 in self.vertices and v2 in self.vertices:
+#             self.vertices[v1].add(v2)
+#         elif v1 not in self.vertices:
+#             self.add_vertex(v1)
+#             self.vertices[v1].add(v2)
+#         elif v2 not in self.vertices:
+#             self.add_vertex(v2)
+#             self.vertices[v1].add(v2)
+
+#     def get_neighbors(self, vertex_id):
+#         if vertex_id not in self.vertices:
+#             raise IndexError("Vertex does not exist in graph!")
+#         return self.vertices[vertex_id]
+
+#     def bft(self, starting_vertex):
+#         qq = Queue()
+#         qq.enqueue(starting_vertex)
+#         visited = set()
+#         while qq.size() > 0:
+#             vert = qq.dequeue()
+#             if vert not in visited:
+#                 visited.add(vert)
+#                 for next_vert in self.get_neighbors(vert):
+#                     qq.enqueue(next_vert)
+
+#     def dft(self, starting_vertex):
+#         st = Stack()
+#         st.push(starting_vertex)
+#         visited = set()
+#         while st.size() > 0:
+#             vert = st.pop()
+#             if vert not in visited:
+#                 print(vert)
+#                 visited.add(vert)
+#                 for next_vert in self.get_neighbors(vert):
+#                     st.push(next_vert)
+
+# # a traversal path
+# # a reversal path (empty list)
+# # visited was empty dictionary
+# # inverse direction (n to s, e to w)
+# # length of room graph and length of visited
+# # current room get exits, pass that into visited dictionary of current room id
 # visited_path = set()
+# st = Stack()
+# # st.push(player.current_room)
+# qt = Queue()
+# qt.enqueue(player.current_room)
+# reversal_path = {'n': 's', 's': 'n', 'w': 'e', 'e': 'w'}
 
+# gg = Graph()
+# for item in room_graph:
+#     gg.add_vertex(item)
+#     for room in room_graph[item][1]:
+#         gg.add_edge(item, room_graph[item][1][room])
 
-# a traversal path
-# a reversal path (empty list)
-# visited was empty dictionary
-# inverse direction (n to s, e to w)
-# length of room graph and length of visited
-# current room get exits, pass that into visited dictionary of current room id
-visited_path = set()
-st = Stack()
-# st.push(player.current_room)
-qt = Queue()
-qt.enqueue(player.current_room)
-reversal_path = {'n': 's', 's': 'n', 'w': 'e', 'e': 'w'}
-
-gg = Graph()
-for item in room_graph:
-    gg.add_vertex(item)
-    for room in room_graph[item][1]:
-        gg.add_edge(item, room_graph[item][1][room])
-
-gg.dft(player.current_room.id)
+# gg.dft(player.current_room.id)
 
 
 # for item in room_graph:
@@ -310,8 +344,8 @@ visited_rooms.add(player.current_room)
 for move in traversal_path:
     player.travel(move)
     visited_rooms.add(player.current_room)
-    print(f"MOVE: {move}")
-    print(f"ID:{player.current_room.id}")
+    # print(f"MOVE: {move}")
+    # print(f"ID:{player.current_room.id}")
 
 print(f"MOVES: {len(traversal_path)}")
 
